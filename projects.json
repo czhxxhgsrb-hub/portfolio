@@ -1,10 +1,10 @@
 {
     "projects": [
         {
-            "title": "Projekt A",
-            "description": "Kort beskrivelse",
-            "live": "https://example.com",
-            "repo": "https://github.com/<dit-brugernavn>/projekt-a"
+            "title": "Political Simulator (Canvas)",
+            "description": "Browser-demo med HTML canvas.",
+            "live": "./projects/polsimulator/",
+            "repo": "https://github.com/czhxxhgsrb-hub/<repo>"
         }
     ]
 }
