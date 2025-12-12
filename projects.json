@@ -1,0 +1,10 @@
+{
+    "projects": [
+        {
+            "title": "Projekt A",
+            "description": "Kort beskrivelse",
+            "live": "https://example.com",
+            "repo": "https://github.com/<dit-brugernavn>/projekt-a"
+        }
+    ]
+}
