@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="da">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Oliver Fisker Portfolio</title>
+    <meta name="description" content="Portfolio med projekter og kontaktinfo." />
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <a class="brand" href="./">Dit Navn</a>
+        <nav class="nav">
+            <a href="#projekter">Projekter</a>
+            <a href="#om">Om</a>
+            <a href="#kontakt">Kontakt</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div>
+                <h1>Hej, jeg hedder Oliver og det her er min Portfolie</h1>
+                <p class="muted">
+                    Jeg bygger ting. Her kommer mine projekter løbende.
+                </p>
+                <div class="cta">
+                    <a class="button" href="#projekter">Se projekter</a>
+                    <a class="button button--ghost" href="#kontakt">Kontakt</a>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card__title">Status</div>
+                <p class="muted">Portfolio online ✅</p>
+                <p class="muted">Næste: første projektkort</p>
+            </div>
+        </section>
+
+        <section id="projekter" class="section">
+            <div class="section__header">
+                <h2>Projekter</h2>
+                <p class="muted">De dukker op her, når du tilføjer dem i <code>projects.json</code>.</p>
+            </div>
+            <div id="projectsGrid" class="grid"></div>
+            <p id="emptyState" class="muted empty">Ingen projekter endnu – coming soon.</p>
+        </section>
+
+        <section id="om" class="section">
+            <div class="section__header">
+                <h2>Om</h2>
+                <p class="muted">Skriv et par linjer om dig selv, tech stack, interesser osv.</p>
+            </div>
+            <div class="card">
+                <p>
+                    Jeg er udvikler med fokus på <strong>…</strong> og jeg elsker at bygge <strong>…</strong>.
+                </p>
+            </div>
+        </section>
+
+        <section id="kontakt" class="section">
+            <div class="section__header">
+                <h2>Kontakt</h2>
+                <p class="muted">Gør det let at finde dig.</p>
+            </div>
+            <div class="card">
+                <ul class="links">
+                    <li><a href="mailto:dinmail@eksempel.dk">dinmail@eksempel.dk</a></li>
+                    <li><a href="https://github.com/<dit-brugernavn>" target="_blank" rel="noreferrer">GitHub</a></li>
+                    <li><a href="https://www.linkedin.com/in/<dit-navn>/" target="_blank" rel="noreferrer">LinkedIn</a>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <footer class="footer muted">
+            © <span id="year"></span> Dit Navn
+        </footer>
+    </main>
+
+    <script src="./main.js" defer></script>
+</body>
+
+</html>
