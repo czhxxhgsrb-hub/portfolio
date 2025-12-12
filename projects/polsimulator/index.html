@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="da">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Political Simulator</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+    <main class="wrap">
+        <h1>Political Simulator</h1>
+
+        <div class="controls">
+            <button id="toggleBtn">Pause</button>
+            <button id="stepBtn">Step</button>
+            <button id="resetBtn">Reset</button>
+            <span id="info"></span>
+        </div>
+
+        <canvas id="c" width="800" height="800"></canvas>
+
+        <p class="muted">
+            Demo i browseren (HTML canvas). Logikken er portet fra din .fsx (DIKU.Canvas kan ikke køre direkte på GitHub
+            Pages).
+        </p>
+    </main>
+
+    <script src="./app.js" defer></script>
+</body>
+
+</html>

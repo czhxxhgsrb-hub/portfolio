@@ -1,0 +1,53 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #fff;
+    color: #000;
+    font-family: Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+}
+
+.wrap {
+    width: min(900px, 94vw);
+    margin: 28px auto;
+}
+
+h1 {
+    margin: 0 0 10px 0;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+button {
+    font: inherit;
+    padding: 6px 10px;
+    border: 1px solid #000;
+    background: #fff;
+    cursor: pointer;
+}
+
+#info {
+    color: #555;
+}
+
+canvas {
+    width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+}
+
+.muted {
+    color: #555;
+}
