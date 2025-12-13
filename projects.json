@@ -1,7 +1,7 @@
 {
     "projects": [
         {
-            "title": "Political Simulator (Canvas)",
+            "title": "Political Simulator (Canvas) (13/12/25)",
             "description": "Browser-demo med HTML canvas.",
             "live": "./projects/polsimulator/",
             "repo": "https://github.com/czhxxhgsrb-hub/<repo>"
