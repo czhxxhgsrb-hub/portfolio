@@ -43,3 +43,29 @@ button:active {
 .wide {
     grid-column: span 2;
 }
+
+/* Copy message next to C */
+.copy {
+    position: relative;
+}
+
+.copy button {
+    width: 100%;
+}
+
+.copy-msg {
+    position: absolute;
+    right: calc(100% + 8px);
+    /* <-- puts it on the left */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #888;
+    white-space: nowrap;
+    opacity: 0;
+}
+
+
+.copy-msg.show {
+    opacity: 1;
+}

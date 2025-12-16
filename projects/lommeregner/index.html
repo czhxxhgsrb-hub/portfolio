@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>den der calc</title>
+    <title>Calculator</title>
     <link rel="stylesheet" href="./style.css" />
 </head>
 
@@ -13,7 +13,11 @@
         <input id="display" class="display" value="" readonly />
 
         <div class="keys">
-            <button data-action="clear">del</button>
+            <div class="copy">
+                <button data-action="clear">del</button>
+                <span id="copy-msg" class="copy-msg" aria-live="polite"></span>
+            </div>
+
             <button data-value="*">*</button>
             <button data-value="-">-</button>
             <button data-value="+">+</button>
