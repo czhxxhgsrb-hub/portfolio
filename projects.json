@@ -5,6 +5,12 @@
             "description": "Browser-demo med HTML canvas.",
             "live": "./projects/polsimulator/",
             "repo": "https://github.com/czhxxhgsrb-hub/<repo>"
+        },
+        {
+            "title": "Lommeregner",
+            "description": "Semi-funktionel lommeregner",
+            "live": "./projects/lommeregner/",
+            "repo": "https://github.com/czhxxhgsrb-hub/<repo>"
         }
     ]
 }
