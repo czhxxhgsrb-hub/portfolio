@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FPL Project</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+    <div class="calc">
+        <div class="header">
+            <div class="title">FPL Project</div>
+            <div id="status" class="status" aria-live="polite">Ready.</div>
+        </div>
+
+        <div class="panel">
+            <input id="search" class="display left" placeholder="Search player name…" />
+            <div class="filters">
+                <select id="pos">
+                    <option value="">All positions</option>
+                    <option value="Goalkeeper">Goalkeeper</option>
+                    <option value="Defender">Defender</option>
+                    <option value="Midfielder">Midfielder</option>
+                    <option value="Forward">Forward</option>
+                </select>
+
+                <select id="sort">
+                    <option value="pred_desc">Sort: predicted ↓</option>
+                    <option value="value_desc">Sort: value ↓</option>
+                    <option value="price_asc">Sort: price ↑</option>
+                    <option value="name_asc">Sort: name A→Z</option>
+                </select>
+            </div>
+
+            <div class="actions">
+                <button id="load">Load projections</button>
+                <button id="loadTeam">Load optimal 4-4-2</button>
+            </div>
+
+            <div id="info" class="info"></div>
+        </div>
+
+        <div class="panel">
+            <div class="subtitle">Optimal team (4-4-2)</div>
+            <div id="team" class="team"></div>
+        </div>
+
+        <div class="panel">
+            <div class="subtitle">Players</div>
+            <div class="tableWrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Pos</th>
+                            <th>Team</th>
+                            <th class="num">Price</th>
+                            <th class="num">Pred (next 3)</th>
+                            <th class="num">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="./app.js"></script>
+</body>
+
+</html>
