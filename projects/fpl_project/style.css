@@ -141,3 +141,12 @@ button:active {
 .num {
     text-align: right;
 }
+
+.explanation-text {
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.explanation-text p {
+    margin: 0 0 10px 0;
+}

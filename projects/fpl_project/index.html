@@ -10,6 +10,32 @@
 
 <body>
     <div class="calc">
+
+        <!-- PROJECT EXPLANATION -->
+        <div class="panel explanation">
+            <div class="subtitle">About This Project</div>
+
+            <div id="projectText" class="explanation-text">
+                <p>
+                    This project predicts Fantasy Premier League (FPL) player performance
+                    using machine learning. A Random Forest model is trained separately
+                    for each position using rolling performance metrics such as xG, xA,
+                    recent points, and minutes played.
+                </p>
+
+                <p>
+                    The model estimates expected points over the next three matches.
+                    An optimization model (integer linear programming) is then used to
+                    construct the optimal 4-4-2 squad under budget and team constraints.
+                </p>
+
+                <p>
+                    The goal of this project is to combine statistical modeling and
+                    optimization techniques to support FPL decision-making in a clear
+                    and transparent way.
+                </p>
+            </div>
+        </div>
         <div class="header">
             <div class="title">FPL Project</div>
             <div id="status" class="status" aria-live="polite">Ready.</div>
