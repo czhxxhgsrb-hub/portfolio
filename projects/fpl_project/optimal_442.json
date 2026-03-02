@@ -1,0 +1,231 @@
+{
+  "formation": "4-4-2",
+  "squad": [
+    {
+      "name": "Alex Scott",
+      "team": "Bournemouth",
+      "position": "Midfielder",
+      "price": 5.1,
+      "predicted_points_next_3": 16.730000000000015
+    },
+    {
+      "name": "Alisson Becker",
+      "team": "Liverpool",
+      "position": "Goalkeeper",
+      "price": 5.4,
+      "predicted_points_next_3": 14.439999999999994
+    },
+    {
+      "name": "Brian Brobbey",
+      "team": "Sunderland",
+      "position": "Forward",
+      "price": 5.4,
+      "predicted_points_next_3": 7.313333333333331
+    },
+    {
+      "name": "Benjamin Sesko",
+      "team": "Man Utd",
+      "position": "Forward",
+      "price": 7.3,
+      "predicted_points_next_3": 16.53333333333333
+    },
+    {
+      "name": "Amine Adli",
+      "team": "Bournemouth",
+      "position": "Midfielder",
+      "price": 5.4,
+      "predicted_points_next_3": 16.586666666666662
+    },
+    {
+      "name": "Cole Palmer",
+      "team": "Chelsea",
+      "position": "Midfielder",
+      "price": 10.6,
+      "predicted_points_next_3": 22.68666666666666
+    },
+    {
+      "name": "Joe Rodon",
+      "team": "Leeds",
+      "position": "Defender",
+      "price": 3.9,
+      "predicted_points_next_3": 12.979999999999999
+    },
+    {
+      "name": "Tyrone Mings",
+      "team": "Aston Villa",
+      "position": "Defender",
+      "price": 4.3,
+      "predicted_points_next_3": 12.756666666666671
+    },
+    {
+      "name": "Lesley Ugochukwu",
+      "team": "Burnley",
+      "position": "Midfielder",
+      "price": 5.0,
+      "predicted_points_next_3": 9.339999999999993
+    },
+    {
+      "name": "Mads Hermansen",
+      "team": "West Ham",
+      "position": "Goalkeeper",
+      "price": 4.2,
+      "predicted_points_next_3": 11.096666666666657
+    },
+    {
+      "name": "Nathan Collins",
+      "team": "Brentford",
+      "position": "Defender",
+      "price": 4.9,
+      "predicted_points_next_3": 4.028690476190476
+    },
+    {
+      "name": "Erling Haaland",
+      "team": "Man City",
+      "position": "Forward",
+      "price": 14.8,
+      "predicted_points_next_3": 21.8733333333333
+    },
+    {
+      "name": "Florian Wirtz",
+      "team": "Liverpool",
+      "position": "Midfielder",
+      "price": 8.3,
+      "predicted_points_next_3": 23.183333333333337
+    },
+    {
+      "name": "James Hill",
+      "team": "Bournemouth",
+      "position": "Defender",
+      "price": 4.1,
+      "predicted_points_next_3": 17.08666666666666
+    },
+    {
+      "name": "Virgil van Dijk",
+      "team": "Liverpool",
+      "position": "Defender",
+      "price": 6.1,
+      "predicted_points_next_3": 14.903333333333334
+    }
+  ],
+  "starting_xi": [
+    {
+      "name": "Alex Scott",
+      "team": "Bournemouth",
+      "position": "Midfielder",
+      "price": 5.1,
+      "predicted_points_next_3": 16.730000000000015
+    },
+    {
+      "name": "Alisson Becker",
+      "team": "Liverpool",
+      "position": "Goalkeeper",
+      "price": 5.4,
+      "predicted_points_next_3": 14.439999999999994
+    },
+    {
+      "name": "Benjamin Sesko",
+      "team": "Man Utd",
+      "position": "Forward",
+      "price": 7.3,
+      "predicted_points_next_3": 16.53333333333333
+    },
+    {
+      "name": "Amine Adli",
+      "team": "Bournemouth",
+      "position": "Midfielder",
+      "price": 5.4,
+      "predicted_points_next_3": 16.586666666666662
+    },
+    {
+      "name": "Cole Palmer",
+      "team": "Chelsea",
+      "position": "Midfielder",
+      "price": 10.6,
+      "predicted_points_next_3": 22.68666666666666
+    },
+    {
+      "name": "Joe Rodon",
+      "team": "Leeds",
+      "position": "Defender",
+      "price": 3.9,
+      "predicted_points_next_3": 12.979999999999999
+    },
+    {
+      "name": "Tyrone Mings",
+      "team": "Aston Villa",
+      "position": "Defender",
+      "price": 4.3,
+      "predicted_points_next_3": 12.756666666666671
+    },
+    {
+      "name": "Erling Haaland",
+      "team": "Man City",
+      "position": "Forward",
+      "price": 14.8,
+      "predicted_points_next_3": 21.8733333333333
+    },
+    {
+      "name": "Florian Wirtz",
+      "team": "Liverpool",
+      "position": "Midfielder",
+      "price": 8.3,
+      "predicted_points_next_3": 23.183333333333337
+    },
+    {
+      "name": "James Hill",
+      "team": "Bournemouth",
+      "position": "Defender",
+      "price": 4.1,
+      "predicted_points_next_3": 17.08666666666666
+    },
+    {
+      "name": "Virgil van Dijk",
+      "team": "Liverpool",
+      "position": "Defender",
+      "price": 6.1,
+      "predicted_points_next_3": 14.903333333333334
+    }
+  ],
+  "bench": [
+    {
+      "name": "Brian Brobbey",
+      "team": "Sunderland",
+      "position": "Forward",
+      "price": 5.4,
+      "predicted_points_next_3": 7.313333333333331
+    },
+    {
+      "name": "Lesley Ugochukwu",
+      "team": "Burnley",
+      "position": "Midfielder",
+      "price": 5.0,
+      "predicted_points_next_3": 9.339999999999993
+    },
+    {
+      "name": "Mads Hermansen",
+      "team": "West Ham",
+      "position": "Goalkeeper",
+      "price": 4.2,
+      "predicted_points_next_3": 11.096666666666657
+    },
+    {
+      "name": "Nathan Collins",
+      "team": "Brentford",
+      "position": "Defender",
+      "price": 4.9,
+      "predicted_points_next_3": 4.028690476190476
+    }
+  ],
+  "captain": {
+    "name": "Florian Wirtz",
+    "team": "Liverpool",
+    "position": "Midfielder",
+    "price": 8.3,
+    "predicted_points_next_3": 23.183333333333337
+  },
+  "totals": {
+    "total_cost": 94.8,
+    "xi_points_next_3": 189.76,
+    "xi_plus_captain_next_3": 212.94
+  }
+}

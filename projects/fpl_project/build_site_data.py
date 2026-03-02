@@ -9,7 +9,10 @@ from sklearn.metrics import mean_squared_error, r2_score
 from pulp import LpProblem, LpVariable, LpMaximize, lpSum, LpBinary, PULP_CBC_CMD
 
 
-CSV_IN = "fpl_data.csv"
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CSV_IN = os.path.join(BASE_DIR, "fpl_data.csv")
 OUT_PROJECTIONS = "projections.json"
 OUT_OPTIMAL_442 = "optimal_442.json"
 
