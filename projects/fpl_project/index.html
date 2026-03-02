@@ -11,28 +11,27 @@
 <body>
     <div class="calc">
 
-        <!-- PROJECT EXPLANATION -->
         <div class="panel explanation">
-            <div class="subtitle">About This Project</div>
+            <div class="subtitle">Om dette projekt</div>
 
             <div id="projectText" class="explanation-text">
                 <p>
-                    This project predicts Fantasy Premier League (FPL) player performance
-                    using machine learning. A Random Forest model is trained separately
-                    for each position using rolling performance metrics such as xG, xA,
-                    recent points, and minutes played.
+                    Formålet med dette projekt er at angive det "matematisk optimale Fantasy Premier League (FPL) hold".
+                    Dette gøres ved at træne en Random Regression Forest for hver position, til at beregne spillernes
+                    performance,
+                    ud fra statistikker som xG, xA, points og minutter spillet,
+                    på Premier League's hjemmeside gennem deres API: https://fantasy.premierleague.com/api.
                 </p>
 
                 <p>
-                    The model estimates expected points over the next three matches.
-                    An optimization model (integer linear programming) is then used to
-                    construct the optimal 4-4-2 squad under budget and team constraints.
+                    Modellen estimerer forventede pointer over de næste 3 kampe.
+                    En optimeringsmodel bruges derefter til at konstruere det optimale 4-4-2 hold af spillere,
+                    givet budgettet, og mængden af spillere fra hver position der skal være på holdet.
                 </p>
 
                 <p>
-                    The goal of this project is to combine statistical modeling and
-                    optimization techniques to support FPL decision-making in a clear
-                    and transparent way.
+                    Målet med projektet var at få erfaring med at kombinere statistisk modellering og optimisering,
+                    på reel data.
                 </p>
             </div>
         </div>
