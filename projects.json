@@ -1,9 +1,9 @@
 {
     "projects": [
         {
-            "title": "Political Simulator (Canvas) (13/12/25)",
-            "description": "Browser-demo med HTML canvas.",
-            "live": "./projects/polsimulator/",
+            "title": "FPL Projekt (2/3/2026)",
+            "description": "Scraping, data engineering og optimering.",
+            "live": "./projects/fpl_project/",
             "repo": "https://github.com/czhxxhgsrb-hub/<repo>"
         },
         {
@@ -13,9 +13,9 @@
             "repo": "https://github.com/czhxxhgsrb-hub/<repo>"
         },
         {
-            "title": "FPL Projekt (2/3/2026)",
-            "description": "Scraping, data engineering og optimering.",
-            "live": "./projects/fpl_project/",
+            "title": "Political Simulator (Canvas) (13/12/25)",
+            "description": "Browser-demo med HTML canvas.",
+            "live": "./projects/polsimulator/",
             "repo": "https://github.com/czhxxhgsrb-hub/<repo>"
         }
     ]
