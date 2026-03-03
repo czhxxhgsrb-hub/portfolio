@@ -2,13 +2,13 @@
     "projects": [
         {
             "title": "FPL Projekt (2/3/2026)",
-            "description": "Scraping, data engineering og optimering.",
+            "description": "Scraping, feature engineering og optimering.",
             "live": "./projects/fpl_project/",
             "repo": "https://github.com/czhxxhgsrb-hub/<repo>"
         },
         {
             "title": "Lommeregner (16/12/25)",
-            "description": "Semi-funktionel lommeregner",
+            "description": "Semi-funktionel javascript lommeregner",
             "live": "./projects/lommeregner/",
             "repo": "https://github.com/czhxxhgsrb-hub/<repo>"
         },
