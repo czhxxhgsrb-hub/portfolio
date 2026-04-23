@@ -72,7 +72,7 @@
       .from("scores")
       .select("name, time_seconds")
       .order("time_seconds", { ascending: true })
-      .limit(100);
+      .limit(20);
 
     if (error) {
       console.error(error);
