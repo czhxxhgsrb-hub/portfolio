@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ALFABETSPILLET TYPE SHIT</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>DU SKAL BARE SKRIVE ALFABETET</h1>
+    <div id="output"></div>
+    <h1>TID: <span id="timer">0.00</span> SEKUNDER</h1>
+    <h2>Leaderboard</h2>
+    <ol id="scoresList"></ol>
+
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js";
+
+  const supabaseUrl = "https://mucboskwxwhwlgesmjpd.supabase.co";
+  const supabaseKey = "sb_publishable_FHWQZkpzM7BtdFCoKUk33w_p0INRm0X";
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  let text = "";
+  let startTime = null;
+  let timerInterval = null;
+
+  const output = document.getElementById("output");
+  const timerDisplay = document.getElementById("timer");
+  const scoresList = document.getElementById("scoresList");
+
+  const target = "ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ";
+
+  function render() {
+    let html = "";
+
+    for (let i = 0; i < target.length; i++) {
+      if (text[i] == null) {
+        html += `<span style="color: gray">${target[i]}</span>`;
+      } else if (text[i] === target[i]) {
+        html += `<span style="color: green">${text[i]}</span>`;
+      } else {
+        html += `<span style="color: red">${text[i]}</span>`;
+      }
+    }
+
+    output.innerHTML = html;
+  }
+
+  function resetGame() {
+    text = "";
+    startTime = null;
+    clearInterval(timerInterval);
+    timerInterval = null;
+    timerDisplay.textContent = "0.00";
+    render();
+  }
+
+  async function saveScore(name, timeSeconds) {
+    const { error } = await supabase
+      .from("scores")
+      .insert([{ name, time_seconds: timeSeconds }]);
+
+    if (error) {
+      console.error(error);
+      alert("Could not save score");
+    }
+  }
+
+  async function loadScores() {
+    const { data, error } = await supabase
+      .from("scores")
+      .select("name, time_seconds")
+      .order("time_seconds", { ascending: true })
+      .limit(10);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    scoresList.innerHTML = "";
+
+    for (const row of data) {
+      const li = document.createElement("li");
+      li.textContent = `${row.name} - ${Number(row.time_seconds).toFixed(2)} sek`;
+      scoresList.appendChild(li);
+    }
+  }
+
+  document.addEventListener("keydown", async (e) => {
+    if (e.key === "Backspace") {
+      text = text.slice(0, -1);
+      render();
+      return;
+    }
+
+    if (e.key === "Enter") {
+      resetGame();
+      return;
+    }
+
+    if (e.key.length !== 1) {
+      return;
+    }
+
+    if (startTime === null) {
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        const currentTime = (Date.now() - startTime) / 1000;
+        timerDisplay.textContent = currentTime.toFixed(2);
+      }, 50);
+    }
+
+    if (text.length >= target.length) {
+      resetGame();
+      return;
+    }
+
+    text += e.key.toUpperCase();
+    render();
+
+    if (text === target) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+
+      const finalTime = (Date.now() - startTime) / 1000;
+      timerDisplay.textContent = finalTime.toFixed(2);
+
+      const name = prompt("Your name:");
+      if (name) {
+        await saveScore(name, finalTime);
+        await loadScores();
+      }
+
+      alert(`Finished in ${finalTime.toFixed(2)} seconds`);
+      resetGame();
+    }
+  });
+
+  render();
+  loadScores();
+</script>
+</body>
+</html>
