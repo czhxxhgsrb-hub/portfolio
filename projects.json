@@ -1,6 +1,12 @@
 {
     "projects": [
         {
+            "title": "Typing game",
+            "description": "Game using HTML, JS and CSS..",
+            "live": "./projects/alfabetspillet/",
+            "repo": "https://github.com/czhxxhgsrb-hub/<repo>"
+        },
+        {
             "title": "FPL Projekt (2/3/2026)",
             "description": "Scraping, feature engineering og optimering.",
             "live": "./projects/fpl_project/",
