@@ -56,15 +56,16 @@
   }
 
   async function saveScore(name, timeSeconds) {
-    const { error } = await supabase
-      .from("scores")
-      .insert([{ name, time_seconds: timeSeconds }]);
+  const { error } = await supabase.rpc("submit_score", {
+    player_name: name,
+    new_time: timeSeconds
+  });
 
-    if (error) {
-      console.error(error);
-      alert("Could not save score");
-    }
+  if (error) {
+    console.error(error);
+    alert("Could not save score");
   }
+}
 
   async function loadScores() {
     const { data, error } = await supabase
