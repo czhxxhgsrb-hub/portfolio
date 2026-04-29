@@ -1,8 +1,8 @@
 {
     "projects": [
         {
-            "title": "Typing Game (23/4/2026)",
-            "description": "Game using HTML, JS and CSS..",
+            "title": "Alfabet-spillet (23/4/2026)",
+            "description": "Spil ved brug af HTML, JS and CSS.",
             "live": "./projects/alfabetspillet/",
             "repo": "https://github.com/czhxxhgsrb-hub/<repo>"
         },
