@@ -18,7 +18,7 @@ async function loadProjects() {
       // vælg primært link: live hvis findes, ellers repo
       const href = p.live || p.repo || "#";
       const title = escapeHtml(p.title ?? "Untitled");
-      const desc = p.description ? ` <span class="muted">— ${escapeHtml(p.description)}</span>` : "";
+      const desc = p.description ? ` <span class="muted">- ${escapeHtml(p.description)}</span>` : "";
 
       return `<li><a href="${href}" target="_blank" rel="noreferrer">${title}</a>${desc}</li>`;
     }).join("");
