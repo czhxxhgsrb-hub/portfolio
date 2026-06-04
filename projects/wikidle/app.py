@@ -1,20 +1,23 @@
 from flask import Flask, render_template, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
-import re, random
+import re
+import random
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from connection import get_connection
 import os
 
-# TODO:
-# final design touches
-
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key")
+
+# Cache articles so the app does NOT fetch/process the whole database every request
+ARTICLES_CACHE = None
+
 
 def init_game_tables():
     connection = get_connection()
     cursor = connection.cursor()
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -23,6 +26,7 @@ def init_game_tables():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS game_results (
             id SERIAL PRIMARY KEY,
@@ -32,10 +36,12 @@ def init_game_tables():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
+
     cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_game_results_article_title
         ON game_results(article_title);
     """)
+
     connection.commit()
     cursor.close()
     connection.close()
@@ -60,6 +66,7 @@ def create_user(username, password):
             "INSERT INTO users (username, password_hash) VALUES (%s, %s) RETURNING id;",
             (username, generate_password_hash(password))
         )
+
         user_id = cursor.fetchone()[0]
         connection.commit()
         return user_id, None
@@ -76,11 +83,14 @@ def create_user(username, password):
 def login_user(username, password):
     connection = get_connection()
     cursor = connection.cursor(cursor_factory=RealDictCursor)
+
     cursor.execute(
         "SELECT id, username, password_hash FROM users WHERE username = %s;",
         (username,)
     )
+
     user = cursor.fetchone()
+
     cursor.close()
     connection.close()
 
@@ -89,15 +99,17 @@ def login_user(username, password):
 
     session["user_id"] = user["id"]
     session["username"] = user["username"]
+
     return True
 
 
 def save_game_result(article_title, guesses):
-    connection = get_connection()
     if not get_current_user() or session.get("result_saved"):
         return
 
+    connection = get_connection()
     cursor = connection.cursor()
+
     cursor.execute(
         """
         INSERT INTO game_results (user_id, article_title, guesses)
@@ -105,6 +117,7 @@ def save_game_result(article_title, guesses):
         """,
         (session["user_id"], article_title, guesses)
     )
+
     connection.commit()
     cursor.close()
     connection.close()
@@ -130,14 +143,11 @@ def get_leaderboard(article_title):
 
     rows = cursor.fetchall()
 
-    # Convert database rows into a dictionary like:
-    # {1: 3, 2: 5, 3: 0, ...}
     counts_by_guess = {
         row["guesses"]: row["player_count"]
         for row in rows
     }
 
-    # Always show guesses 1 through 10, even if count is 0
     histogram = []
     max_count = 0
 
@@ -150,7 +160,6 @@ def get_leaderboard(article_title):
             "player_count": player_count
         })
 
-    # Add a bar height percentage for CSS
     for row in histogram:
         if max_count == 0:
             row["height_percent"] = 0
@@ -174,6 +183,7 @@ def get_leaderboard(article_title):
 
     cursor.close()
     connection.close()
+
     return histogram, top_scores
 
 
@@ -192,7 +202,8 @@ def reset_game_to_start():
     session["guesses"] = []
     session["wiki_page"] = None
 
-def mask_title_in_text(text, title): # regex til at erstatte titel i summary med "____"
+
+def mask_title_in_text(text, title):
     if not text:
         return text
 
@@ -205,41 +216,52 @@ def mask_title_in_text(text, title): # regex til at erstatte titel i summary med
     return text
 
 
+def remove_first_sentence_parentheses(text):
+    start = text.find("(")
+
+    if start == -1:
+        return text
+
+    depth = 0
+
+    for i in range(start, len(text)):
+        if text[i] == "(":
+            depth += 1
+        elif text[i] == ")":
+            depth -= 1
+
+            if depth == 0:
+                return text[:start] + text[i + 1:]
+
+    return text
+
+
 def example_dict():
+    global ARTICLES_CACHE
+
+    # Return cached articles instead of querying Supabase every request
+    if ARTICLES_CACHE is not None:
+        return ARTICLES_CACHE
+
     connection = get_connection()
     cursor = connection.cursor()
+
     cursor.execute("""
         SELECT title, summary, category, picture
-        FROM wikipedia_articles
+        FROM wikipedia_articles;
     """)
+
     rows = cursor.fetchall()
+
     cursor.close()
     connection.close()
 
     articles = {}
 
-    def remove_first_sentence_parentheses(text):
-    # fjerner første parantes i første sætning af en artikel.
-    # Parantesen indeholder ofte udtalelse af artikel, f.eks (Swedish: [ˈɡrêːta ˈtʉ̂ːnbærj] ; born 3 January 2003).
-        start = text.find("(")
-
-        if start == -1:
-            return text
-        depth = 0
-
-        for i in range(start, len(text)):
-            if text[i] == "(":
-                depth += 1
-            elif text[i] == ")":
-                depth -= 1
-
-                if depth == 0:
-                    return text[:start] + text[i + 1:]
-        return text
-    
     for title, summary, category, picture in rows:
-        if not summary or len(summary) < 300: # artikler under 300 tegn bliver fjernet. Artikler over 2000 tegn bliver forkortet til nærmeste punktum
+        if not summary or len(summary) < 300:
             continue
+
         if len(summary) > 2000:
             cutoff = summary[:2000].rfind(".")
 
@@ -247,9 +269,8 @@ def example_dict():
                 summary = summary[:cutoff + 1]
             else:
                 summary = summary[:2000]
-        
-        summary = remove_first_sentence_parentheses(summary)
 
+        summary = remove_first_sentence_parentheses(summary)
         masked_text = mask_title_in_text(summary, title)
 
         articles[title] = {
@@ -260,20 +281,20 @@ def example_dict():
             "wiki_picture": picture,
         }
 
-    return articles
+    ARTICLES_CACHE = articles
+    return ARTICLES_CACHE
 
-try:
-    init_game_tables()
-except Exception as e:
-    print(f"Database initialization failed: {e}")
 
 @app.route("/", methods=["GET", "POST"])
 def home():
     search_text = "..."
     game_state = session.get("game_state", "not_started")
+
     articles = example_dict()
 
-    # IMPORTANT: this must come before any POST/action logic
+    if not articles:
+        return "No articles found. Check your Supabase wikipedia_articles table.", 500
+
     current_user = get_current_user()
 
     invalid_guess = False
@@ -301,7 +322,6 @@ def home():
     wiki_theme = ""
     wiki_name_blurred = ""
 
-    #restore current wiki page from session
     if wiki_page in articles:
         wiki_name = articles[wiki_page]["wiki_name"]
         wiki_text = articles[wiki_page]["wiki_text"]
@@ -380,7 +400,7 @@ def home():
             guess_color = "white"
             category_color = "white"
             theme_color = "white"
-        
+
         elif action == "reveal_image":
             session["image_revealed"] = True
 
@@ -453,17 +473,21 @@ def home():
         if guess_name == wiki_name:
             wiki_name_blurred = wiki_name
 
-        image_revealed = session.get("image_revealed", False)
-        game_won = (wiki_name == guess_name)
+    image_revealed = session.get("image_revealed", False)
+    game_won = wiki_name == guess_name and wiki_name != ""
 
-        if image_revealed or game_won:
-            image_blur = ""
-        else:
-            image_blur = "blurred"
-    
+    if image_revealed or game_won:
+        image_blur = ""
+    else:
+        image_blur = "blurred"
+
     if session.get("game_state") == "finished" and wiki_name:
         leaderboard_histogram, leaderboard_top_scores = get_leaderboard(wiki_name)
         game_state = "finished"
+
+    # Quick frontend speed fix:
+    # Do not render every single article title into the HTML datalist.
+    autocomplete_options = list(articles.keys())[:500]
 
     return render_template(
         "index.html",
@@ -478,7 +502,7 @@ def home():
         theme_color=theme_color,
         guess_theme=guess_theme,
         guess_category=guess_category,
-        autocomplete_options=articles.keys(),
+        autocomplete_options=autocomplete_options,
         guesses=guesses,
         guess_count=guess_count,
         wiki_name_blurred=wiki_name_blurred,
@@ -489,7 +513,7 @@ def home():
         wiki_picture=wiki_picture,
         image_blur=image_blur,
         image_revealed=session.get("image_revealed", False),
-        game_won=(wiki_name == guess_name),
+        game_won=game_won,
         current_user=current_user,
         auth_error=auth_error,
         leaderboard_histogram=leaderboard_histogram,
@@ -497,7 +521,12 @@ def home():
     )
 
 
-# runs the shit
-if __name__ == "__main__":
+# Run this once when the app starts, not on every request.
+try:
     init_game_tables()
+except Exception as error:
+    print("Could not initialize game tables:", error)
+
+
+if __name__ == "__main__":
     app.run(debug=True)
