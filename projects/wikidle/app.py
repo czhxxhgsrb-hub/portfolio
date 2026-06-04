@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
 import random
@@ -9,9 +9,6 @@ import os
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key")
-
-# Cache articles so the app does NOT fetch/process the whole database every request
-ARTICLES_CACHE = None
 
 
 def init_game_tables():
@@ -40,6 +37,11 @@ def init_game_tables():
     cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_game_results_article_title
         ON game_results(article_title);
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_wikipedia_articles_title
+        ON wikipedia_articles(title);
     """)
 
     connection.commit()
@@ -201,6 +203,8 @@ def reset_game_to_start():
     session["image_revealed"] = False
     session["guesses"] = []
     session["wiki_page"] = None
+    session["wiki_article"] = None
+    session["result_saved"] = False
 
 
 def mask_title_in_text(text, title):
@@ -210,13 +214,16 @@ def mask_title_in_text(text, title):
     words = title.split()
 
     for word in words:
-        pattern = r'\b' + re.escape(word) + r'\b'
-        text = re.sub(pattern, '_____', text, flags=re.IGNORECASE)
+        pattern = r"\b" + re.escape(word) + r"\b"
+        text = re.sub(pattern, "_____", text, flags=re.IGNORECASE)
 
     return text
 
 
 def remove_first_sentence_parentheses(text):
+    if not text:
+        return text
+
     start = text.find("(")
 
     if start == -1:
@@ -236,64 +243,112 @@ def remove_first_sentence_parentheses(text):
     return text
 
 
-def example_dict():
-    global ARTICLES_CACHE
+def format_article(row):
+    if not row:
+        return None
 
-    # Return cached articles instead of querying Supabase every request
-    if ARTICLES_CACHE is not None:
-        return ARTICLES_CACHE
+    title = row["title"]
+    summary = row["summary"]
+    category = row["category"]
+    picture = row["picture"]
+
+    if not summary or len(summary) < 300:
+        return None
+
+    if len(summary) > 2000:
+        cutoff = summary[:2000].rfind(".")
+
+        if cutoff != -1:
+            summary = summary[:cutoff + 1]
+        else:
+            summary = summary[:2000]
+
+    summary = remove_first_sentence_parentheses(summary)
+    masked_text = mask_title_in_text(summary, title)
+
+    return {
+        "wiki_name": title,
+        "wiki_category": category,
+        "wiki_theme": category,
+        "wiki_text": masked_text,
+        "wiki_picture": picture,
+    }
+
+
+def get_random_article():
+    connection = get_connection()
+    cursor = connection.cursor(cursor_factory=RealDictCursor)
+
+    cursor.execute("""
+        SELECT title, summary, category, picture
+        FROM wikipedia_articles
+        WHERE summary IS NOT NULL
+          AND length(summary) >= 300
+        ORDER BY random()
+        LIMIT 1;
+    """)
+
+    row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    return format_article(row)
+
+
+def get_article_by_title(title):
+    connection = get_connection()
+    cursor = connection.cursor(cursor_factory=RealDictCursor)
+
+    cursor.execute("""
+        SELECT title, summary, category, picture
+        FROM wikipedia_articles
+        WHERE title = %s
+        LIMIT 1;
+    """, (title,))
+
+    row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    return format_article(row)
+
+
+def search_article_titles(query):
+    if not query or len(query.strip()) < 2:
+        return []
 
     connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT title, summary, category, picture
-        FROM wikipedia_articles;
-    """)
+        SELECT title
+        FROM wikipedia_articles
+        WHERE title ILIKE %s
+        ORDER BY title
+        LIMIT 20;
+    """, (f"%{query.strip()}%",))
 
     rows = cursor.fetchall()
 
     cursor.close()
     connection.close()
 
-    articles = {}
+    return [row[0] for row in rows]
 
-    for title, summary, category, picture in rows:
-        if not summary or len(summary) < 300:
-            continue
 
-        if len(summary) > 2000:
-            cutoff = summary[:2000].rfind(".")
-
-            if cutoff != -1:
-                summary = summary[:cutoff + 1]
-            else:
-                summary = summary[:2000]
-
-        summary = remove_first_sentence_parentheses(summary)
-        masked_text = mask_title_in_text(summary, title)
-
-        articles[title] = {
-            "wiki_name": title,
-            "wiki_category": category,
-            "wiki_theme": category,
-            "wiki_text": masked_text,
-            "wiki_picture": picture,
-        }
-
-    ARTICLES_CACHE = articles
-    return ARTICLES_CACHE
+@app.route("/autocomplete")
+def autocomplete():
+    query = request.args.get("q", "").strip()
+    titles = search_article_titles(query)
+    return jsonify(titles)
 
 
 @app.route("/", methods=["GET", "POST"])
 def home():
     search_text = "..."
     game_state = session.get("game_state", "not_started")
-
-    articles = example_dict()
-
-    if not articles:
-        return "No articles found. Check your Supabase wikipedia_articles table.", 500
 
     current_user = get_current_user()
 
@@ -316,19 +371,21 @@ def home():
     theme_color = "white"
 
     wiki_page = session.get("wiki_page")
+    wiki_article = session.get("wiki_article")
+
     wiki_name = ""
     wiki_text = "..."
     wiki_category = ""
     wiki_theme = ""
     wiki_name_blurred = ""
 
-    if wiki_page in articles:
-        wiki_name = articles[wiki_page]["wiki_name"]
-        wiki_text = articles[wiki_page]["wiki_text"]
-        wiki_category = articles[wiki_page]["wiki_category"]
-        wiki_theme = articles[wiki_page]["wiki_theme"]
+    if wiki_article:
+        wiki_name = wiki_article["wiki_name"]
+        wiki_text = wiki_article["wiki_text"]
+        wiki_category = wiki_article["wiki_category"]
+        wiki_theme = wiki_article["wiki_theme"]
+        wiki_picture = wiki_article["wiki_picture"]
         wiki_name_blurred = re.sub(r"\S", "_", wiki_name)
-        wiki_picture = articles[wiki_page]["wiki_picture"]
 
     if request.method == "POST":
         action = request.form.get("action")
@@ -360,11 +417,25 @@ def home():
             session.clear()
             current_user = None
             game_state = "not_started"
+            wiki_article = None
+            wiki_page = None
+            wiki_name = ""
+            wiki_text = "..."
+            wiki_category = ""
+            wiki_theme = ""
+            wiki_picture = ""
+            wiki_name_blurred = ""
 
         elif action == "start" and current_user:
-            wiki_page = random.choice(list(articles.keys()))
+            article = get_random_article()
+
+            if not article:
+                return "No valid articles found. Check your Supabase wikipedia_articles table.", 500
+
+            wiki_page = article["wiki_name"]
 
             session["wiki_page"] = wiki_page
+            session["wiki_article"] = article
             session["image_revealed"] = False
             session["game_state"] = "playing"
             session["guess_count"] = 0
@@ -373,11 +444,11 @@ def home():
 
             game_state = "playing"
 
-            wiki_name = articles[wiki_page]["wiki_name"]
-            wiki_text = articles[wiki_page]["wiki_text"]
-            wiki_category = articles[wiki_page]["wiki_category"]
-            wiki_theme = articles[wiki_page]["wiki_theme"]
-            wiki_picture = articles[wiki_page]["wiki_picture"]
+            wiki_name = article["wiki_name"]
+            wiki_text = article["wiki_text"]
+            wiki_category = article["wiki_category"]
+            wiki_theme = article["wiki_theme"]
+            wiki_picture = article["wiki_picture"]
             wiki_name_blurred = re.sub(r"\S", "_", wiki_name)
 
         elif action == "reset":
@@ -386,6 +457,7 @@ def home():
             search_text = "..."
 
             wiki_page = None
+            wiki_article = None
             wiki_name = ""
             wiki_text = "..."
             wiki_category = ""
@@ -409,21 +481,24 @@ def home():
             guesses = session.get("guesses", [])
 
             already_guessed = any(
-                guess["name"] == search_text for guess in guesses
+                guess["name"].lower() == search_text.lower()
+                for guess in guesses
             )
 
-            if search_text not in articles:
+            guess_article = get_article_by_title(search_text)
+
+            if not guess_article:
                 invalid_guess = True
 
             elif already_guessed:
                 prev_guess = True
 
             else:
-                guess_name = articles[search_text]["wiki_name"]
-                guess_category = articles[search_text]["wiki_category"]
-                guess_theme = articles[search_text]["wiki_theme"]
+                guess_name = guess_article["wiki_name"]
+                guess_category = guess_article["wiki_category"]
+                guess_theme = guess_article["wiki_theme"]
 
-                if search_text == wiki_name:
+                if guess_name == wiki_name:
                     guess_color = "green"
                     wiki_name_blurred = wiki_name
                     session["game_state"] = "finished"
@@ -453,7 +528,7 @@ def home():
                 session["guesses"] = guesses
                 session["guess_count"] = len(guesses)
 
-                if search_text == wiki_name:
+                if guess_name == wiki_name:
                     save_game_result(wiki_name, len(guesses))
 
     guesses = session.get("guesses", [])
@@ -485,10 +560,6 @@ def home():
         leaderboard_histogram, leaderboard_top_scores = get_leaderboard(wiki_name)
         game_state = "finished"
 
-    # Quick frontend speed fix:
-    # Do not render every single article title into the HTML datalist.
-    autocomplete_options = list(articles.keys())[:500]
-
     return render_template(
         "index.html",
         wiki_name=wiki_name,
@@ -502,7 +573,6 @@ def home():
         theme_color=theme_color,
         guess_theme=guess_theme,
         guess_category=guess_category,
-        autocomplete_options=autocomplete_options,
         guesses=guesses,
         guess_count=guess_count,
         wiki_name_blurred=wiki_name_blurred,
@@ -521,7 +591,6 @@ def home():
     )
 
 
-# Run this once when the app starts, not on every request.
 try:
     init_game_tables()
 except Exception as error:

@@ -47,14 +47,13 @@
             <h2>Welcome to WIKIDLE!</h2>
             <p>You will be given a summary of a random Wikipedia article, your goal is to guess which article it is!</p>
             <p>This version of Wikidle is replayable, but the goal is to have the game only be one article per day.</p>
-            <p>Right now the score-chart also only displays your own guesses, since the database is run locally.</p>
             <p>Press start to begin guessing.</p>
-            {% if current_user %}
+
             <form method="POST" class="user-bar">
                 <span>Logged in as <strong>{{ current_user.username }}</strong></span>
                 <button type="submit" name="action" value="logout">Log out</button>
             </form>
-            {% endif %}
+
             <form method="POST">
                 <button type="submit" name="action" value="start">Start Game</button>
             </form>
@@ -111,7 +110,7 @@
     </div>
     {% endif %}
 
-    <!-- main text, comes from "wiki_text" from app.py-->
+    <!-- MAIN TEXT -->
     <div class="text-box">
         {% if wiki_text %}
         <p class="wiki_name_blurred">{{ wiki_name_blurred }}</p>
@@ -119,7 +118,7 @@
         {% endif %}
     </div>
 
-    <!-- image, comes from wiki_picture from app.py -->
+    <!-- IMAGE HINT -->
     <div class="image-container">
         <h3>Image hint</h3>
         <div class="image-box">
@@ -129,8 +128,8 @@
             <img src="{{ url_for('static', filename='images/hint_placeholder.jpg') }}"
                 class="wiki-image {{ image_blur }}">
             {% endif %}
-            {% if guess_count >= 3 and not image_revealed and not (wiki_name == guess_name) %}
-            <!-- amount of guesses needed to show image -->
+
+            {% if guess_count >= 3 and not image_revealed and not game_won %}
             <form method="POST">
                 <button class="reveal-button" type="submit" name="action" value="reveal_image">
                     Reveal Image
@@ -140,16 +139,13 @@
         </div>
     </div>
 
-    <!-- search bar/box + button-->
+    <!-- SEARCH BAR -->
     {% if game_state == "playing" %}
     <form method="POST" class="search-form">
-        <input type="text" name="search" id="search-input" placeholder="Guess something..." autocomplete="off">
+        <input type="text" name="search" id="search-input" placeholder="Guess something..." autocomplete="off"
+            list="autocomplete-options">
 
-        <datalist id="autocomplete-options">
-            {% for option in autocomplete_options %}
-            <option value="{{ option }}">
-                {% endfor %}
-        </datalist>
+        <datalist id="autocomplete-options"></datalist>
 
         <button type="submit" name="action" value="guess">Guess</button>
         <button type="submit" name="action" value="reset">Reset</button>
@@ -157,14 +153,36 @@
 
     <script>
         const searchInput = document.getElementById("search-input");
-        const minChars = 2; // change to 3 if you prefer
+        const dataList = document.getElementById("autocomplete-options");
+
+        let autocompleteTimer = null;
 
         searchInput.addEventListener("input", () => {
-            if (searchInput.value.length >= minChars) {
-                searchInput.setAttribute("list", "autocomplete-options");
-            } else {
-                searchInput.removeAttribute("list");
+            const query = searchInput.value.trim();
+
+            clearTimeout(autocompleteTimer);
+
+            if (query.length < 2) {
+                dataList.innerHTML = "";
+                return;
             }
+
+            autocompleteTimer = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/autocomplete?q=${encodeURIComponent(query)}`);
+                    const titles = await response.json();
+
+                    dataList.innerHTML = "";
+
+                    titles.forEach((title) => {
+                        const option = document.createElement("option");
+                        option.value = title;
+                        dataList.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error("Autocomplete error:", error);
+                }
+            }, 250);
         });
     </script>
     {% endif %}
@@ -181,10 +199,9 @@
     </p>
     {% endif %}
 
-    <!-- CURRENT GUESS BOXES-->
+    <!-- CURRENT GUESS BOXES -->
     <div class="box-container">
 
-        <!-- guess box, text comes from search bar/box above-->
         <div class="box-column">
             <h3>Guess</h3>
             <div class="small-box {{ guess_color }}">
@@ -196,12 +213,11 @@
             </div>
         </div>
 
-        <!-- category box-->
         <div class="box-column">
             <h3>Category</h3>
             <div class="small-box {{ category_color }}">
                 {% if guess_category %}
-                <p class=" search-result">{{ guess_category }}</p>
+                <p class="search-result">{{ guess_category }}</p>
                 {% else %}
                 <p>...</p>
                 {% endif %}
@@ -210,18 +226,16 @@
 
     </div>
 
-    <!-- PREVIOUS GUESS BOXES-->
+    <!-- PREVIOUS GUESSES -->
     {% for guess in guesses[:-1] %}
     <div class="box-container">
 
-        <!-- previous guess name -->
         <div class="box-column">
             <div class="small-box {{ guess.guess_color }}">
                 <p class="search-result">{{ guess.name }}</p>
             </div>
         </div>
 
-        <!-- previous category -->
         <div class="box-column">
             <div class="small-box {{ guess.category_color }}">
                 <p class="search-result">{{ guess.category }}</p>
