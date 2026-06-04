@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>WIKIDLE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap">
+</head>
+
+<body>
+
+    <h1>WIKIDLE</h1>
+    <p>Simply guess what
+        <a href="https://en.wikipedia.org/wiki/Main_Page" target="_blank">
+            Wikipedia</a>
+        article the excerpt below is from!
+    </p>
+
+    <!-- LOGIN SCREEN -->
+    {% if not current_user %}
+    <div class="popup-background">
+        <div class="popup-box login-box">
+            <h2>Log in to WIKIDLE</h2>
+            <p>Log in or create an account before starting the game.</p>
+
+            {% if auth_error %}
+            <p class="error-message small-error">{{ auth_error }}</p>
+            {% endif %}
+
+            <form method="POST" class="login-form">
+                <input type="text" name="username" placeholder="Username" autocomplete="username">
+                <input type="password" name="password" placeholder="Password" autocomplete="current-password">
+
+                <div>
+                    <button type="submit" name="action" value="login">Log In</button>
+                    <button type="submit" name="action" value="register">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- START SCREEN -->
+    {% if current_user and game_state == "not_started" %}
+    <div class="popup-background">
+        <div class="popup-box">
+            <h2>Welcome to WIKIDLE!</h2>
+            <p>You will be given a summary of a random Wikipedia article, your goal is to guess which article it is!</p>
+            <p>This version of Wikidle is replayable, but the goal is to have the game only be one article per day.</p>
+            <p>Right now the score-chart also only displays your own guesses, since the database is run locally.</p>
+            <p>Press start to begin guessing.</p>
+            {% if current_user %}
+            <form method="POST" class="user-bar">
+                <span>Logged in as <strong>{{ current_user.username }}</strong></span>
+                <button type="submit" name="action" value="logout">Log out</button>
+            </form>
+            {% endif %}
+            <form method="POST">
+                <button type="submit" name="action" value="start">Start Game</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- END SCREEN -->
+    {% if game_state == "finished" %}
+    <div class="popup-background">
+        <div class="popup-box endscreen leaderboard-popup">
+            <button class="close-button" onclick="document.querySelector('.popup-background').style.display='none'">
+                ✕
+            </button>
+
+            <h2>You got it!</h2>
+            <p>The answer was {{ wiki_name }}!</p>
+            <p>You used {{ guess_count }} guess(es).</p>
+
+            <h3>Guess distribution</h3>
+
+            <div class="vertical-chart-wrapper">
+                <div class="y-axis-label">Players</div>
+
+                <div class="vertical-chart">
+                    {% for row in leaderboard_histogram %}
+                    <div class="vertical-bar-column">
+                        <div class="bar-value">
+                            {{ row.player_count }}
+                        </div>
+
+                        <div class="vertical-bar-area">
+                            <div class="vertical-bar" style="height: {{ row.height_percent }}%;">
+                            </div>
+                        </div>
+
+                        <div class="x-label">
+                            {{ row.guesses }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="x-axis-label">
+                Number of guesses
+            </div>
+
+            <form method="POST">
+                <button type="submit" name="action" value="start">Play Again</button>
+                <button type="submit" name="action" value="reset">Back to Start</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- main text, comes from "wiki_text" from app.py-->
+    <div class="text-box">
+        {% if wiki_text %}
+        <p class="wiki_name_blurred">{{ wiki_name_blurred }}</p>
+        <p class="wiki-text">{{ wiki_text }}</p>
+        {% endif %}
+    </div>
+
+    <!-- image, comes from wiki_picture from app.py -->
+    <div class="image-container">
+        <h3>Image hint</h3>
+        <div class="image-box">
+            {% if wiki_picture %}
+            <img src="{{ wiki_picture }}" class="wiki-image {{ image_blur }}">
+            {% else %}
+            <img src="{{ url_for('static', filename='images/hint_placeholder.jpg') }}"
+                class="wiki-image {{ image_blur }}">
+            {% endif %}
+            {% if guess_count >= 3 and not image_revealed and not (wiki_name == guess_name) %}
+            <!-- amount of guesses needed to show image -->
+            <form method="POST">
+                <button class="reveal-button" type="submit" name="action" value="reveal_image">
+                    Reveal Image
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- search bar/box + button-->
+    {% if game_state == "playing" %}
+    <form method="POST" class="search-form">
+        <input type="text" name="search" id="search-input" placeholder="Guess something..." autocomplete="off">
+
+        <datalist id="autocomplete-options">
+            {% for option in autocomplete_options %}
+            <option value="{{ option }}">
+                {% endfor %}
+        </datalist>
+
+        <button type="submit" name="action" value="guess">Guess</button>
+        <button type="submit" name="action" value="reset">Reset</button>
+    </form>
+
+    <script>
+        const searchInput = document.getElementById("search-input");
+        const minChars = 2; // change to 3 if you prefer
+
+        searchInput.addEventListener("input", () => {
+            if (searchInput.value.length >= minChars) {
+                searchInput.setAttribute("list", "autocomplete-options");
+            } else {
+                searchInput.removeAttribute("list");
+            }
+        });
+    </script>
+    {% endif %}
+
+    {% if invalid_guess %}
+    <p class="error-message">
+        Guess not valid
+    </p>
+    {% endif %}
+
+    {% if prev_guess %}
+    <p class="error-message">
+        Already guessed!
+    </p>
+    {% endif %}
+
+    <!-- CURRENT GUESS BOXES-->
+    <div class="box-container">
+
+        <!-- guess box, text comes from search bar/box above-->
+        <div class="box-column">
+            <h3>Guess</h3>
+            <div class="small-box {{ guess_color }}">
+                {% if guess_name %}
+                <p class="search-result">{{ guess_name }}</p>
+                {% else %}
+                <p>...</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- category box-->
+        <div class="box-column">
+            <h3>Category</h3>
+            <div class="small-box {{ category_color }}">
+                {% if guess_category %}
+                <p class=" search-result">{{ guess_category }}</p>
+                {% else %}
+                <p>...</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PREVIOUS GUESS BOXES-->
+    {% for guess in guesses[:-1] %}
+    <div class="box-container">
+
+        <!-- previous guess name -->
+        <div class="box-column">
+            <div class="small-box {{ guess.guess_color }}">
+                <p class="search-result">{{ guess.name }}</p>
+            </div>
+        </div>
+
+        <!-- previous category -->
+        <div class="box-column">
+            <div class="small-box {{ guess.category_color }}">
+                <p class="search-result">{{ guess.category }}</p>
+            </div>
+        </div>
+
+    </div>
+    {% endfor %}
+
+</body>
+
+</html>

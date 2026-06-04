@@ -1,6 +1,12 @@
 {
     "projects": [
         {
+            "title": "Wikidle (4/6/26)",
+            "description": "Gruppeprojekt.",
+            "live": "./projects/wikidle/",
+            "repo": "https://github.com/fiskermand/WIKIDLE-REPO"
+        },
+        {
             "title": "Alfabet-spillet (23/4/2026)",
             "description": "Sjov med HTML, JS, CSS og SQL.",
             "live": "./projects/alfabetspillet/",
