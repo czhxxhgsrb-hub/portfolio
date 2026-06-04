@@ -262,11 +262,13 @@ def example_dict():
 
     return articles
 
+try:
+    init_game_tables()
+except Exception as e:
+    print(f"Database initialization failed: {e}")
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    init_game_tables()
-
     search_text = "..."
     game_state = session.get("game_state", "not_started")
     articles = example_dict()
